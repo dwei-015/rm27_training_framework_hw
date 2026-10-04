@@ -1,0 +1,5 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/board",     //	告诉插件：别碰仓库根，源码在 board/（这是病根）
+    "cmake.makeProgram": "/opt/homebrew/bin/ninja",          //GUI 程序的 PATH 里没有 homebrew，手动把 ninja 的完整路径塞给它
+    "cmake.configureOnOpen": true                            //打开文件夹时自动 configure 好，不用手动点
+}
