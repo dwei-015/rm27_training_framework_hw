@@ -11,7 +11,8 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
-
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -25,11 +26,11 @@ set(CMAKE_PROJECT_NAME board)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
-project(${CMAKE_PROJECT_NAME})
+project(${CMAKE_PROJECT_NAME} C CXX ASM)
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
-# Enable CMake support for ASM and C languages
-enable_language(C ASM)
+# Enable CMake support for ASM, C and C++ languages
+enable_language(C ASM CXX)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
@@ -42,14 +43,26 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
 
+# Collect framework sources (bsp / libs / modules / threads)
+# GLOB so newly added .cpp files are picked up on the next configure
+file(GLOB FRAMEWORK_SOURCES CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/../bsp/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libs/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../modules/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../threads/src/*.cpp
+)
+
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
+    ${FRAMEWORK_SOURCES}
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
+    ${CMAKE_CURRENT_SOURCE_DIR}/../bsp/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libs/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../modules/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../threads/include
 )
 
 # Add project symbols (macros)
