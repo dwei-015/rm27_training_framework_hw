@@ -32,9 +32,23 @@ void PWM_Stop(TIM_HandleTypeDef *htim, uint32_t Channel)
 void PWM_SetPeriod(TIM_HandleTypeDef *htim, float period_s)
 {
     // TODO: 根据定时器时钟和预分频值，将秒转换为 ARR 并更新周期。
-    uint32_t tim_clk = HAL_RCC_GetPCLK2Freq();
-    uint32_t arr = (uint32_t)(period_s * tim_clk / (htim->Init.Prescaler + 1) + 0.5f) - 1;
-    __HAL_TIM_SET_AUTORELOAD(htim, arr);
+   // 先求这颗定时器的真实时钟：APB 预分频 ≠ 1 时，定时器时钟 = PCLK × 2。
+    // F407 上 TIM2/3/4/5/6/7/12/13/14 挂 APB1，其余（TIM1/8/9/10/11）挂 APB2。
+    const bool on_apb1 = (htim->Instance == TIM2)  || (htim->Instance == TIM3)  ||
+                         (htim->Instance == TIM4)  || (htim->Instance == TIM5)  ||
+                         (htim->Instance == TIM6)  || (htim->Instance == TIM7)  ||
+                         (htim->Instance == TIM12) || (htim->Instance == TIM13) ||
+                         (htim->Instance == TIM14);
+
+    const uint32_t pclk = on_apb1 ? HAL_RCC_GetPCLK1Freq() : HAL_RCC_GetPCLK2Freq();
+    const uint32_t ppre = on_apb1 ? (RCC->CFGR & RCC_CFGR_PPRE1)
+                                  : (RCC->CFGR & RCC_CFGR_PPRE2);
+    const uint32_t div1 = on_apb1 ? RCC_CFGR_PPRE1_DIV1 : RCC_CFGR_PPRE2_DIV1;
+    const uint32_t tim_clk = (ppre == div1) ? pclk : pclk * 2;
+
+    // 计数频率 = 定时器时钟 / (预分频 + 1)，周期换算成 ARR
+    const uint32_t cnt_freq = tim_clk / (htim->Instance->PSC + 1);
+    __HAL_TIM_SET_AUTORELOAD(htim, (uint32_t)(period_s * (float)cnt_freq) - 1);
 }
 
 void PWM_SetDutyRatio(TIM_HandleTypeDef *htim, float dutyratio, uint32_t channel)
