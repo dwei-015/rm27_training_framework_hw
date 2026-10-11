@@ -101,6 +101,8 @@ void DJIMotorHandler::UpdateSensorData(DJIMotor *motor, uint8_t *can_data)
 
     // 编码器差分：uint16 相减再转 int16，65536 的回绕自动变成正确的小负数/正数
     int16_t diff = (int16_t)(fb->ecd - fb->last_ecd);
+    if (diff > 4096)  diff -= 8192;   // 正向跨边界：8191->0，-8191 修正为 +1
+    if (diff < -4096) diff += 8192; 
     // 输出轴位置(rad)连续累加：先换转子角，再除减速比
     fb->positionFdb += (float)diff * (2.0f * 3.14159265358979f / M2006_ECD_PER_ROUND)
                        / M2006_REDUCTION_RATIO;

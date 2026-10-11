@@ -9,6 +9,10 @@
 
 #include "threads.hpp"
 #include "led.hpp"
+#include "bsp_usart.hpp"
+#include "usart.h"
+
+extern 
 
 
 void AliveThreadEntry(ULONG arg)
@@ -17,12 +21,21 @@ void AliveThreadEntry(ULONG arg)
     UINT imu_status, ctrl_status;
 
     LED_On(LED_B); // 能跑到这里说明 Threads_Init 成功
+    uint8_t msg[] = "imu alive\r\n";
+    USART_Transmit(&huart1, msg, sizeof(msg) - 1, USART_MODE_DMA);
+
 
     while (1)
     {
         // 各等 100 tick（100ms）；返回 TX_SUCCESS = 这期间有心跳
-        imu_status  = tx_semaphore_get(&imu_alive_sem, 100);
-        ctrl_status = tx_semaphore_get(&ctrl_alive_sem, 100);
+        while (tx_semaphore_get(&imu_alive_sem, TX_NO_WAIT) == TX_SUCCESS) {} // 清空旧心跳
+        imu_status  = tx_semaphore_get(&imu_alive_sem, 100);                  
+
+
+        while (tx_semaphore_get(&ctrl_alive_sem, TX_NO_WAIT) == TX_SUCCESS) {} // 清空旧心跳
+        ctrl_status  = tx_semaphore_get(&ctrl_alive_sem, 100);                 
+
+
         if(imu_run_enable == true)
         {
         if (imu_status == TX_SUCCESS)

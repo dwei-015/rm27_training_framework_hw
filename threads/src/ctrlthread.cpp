@@ -16,40 +16,48 @@
 #define MOTOR_ID   0x201
 
 // 验证阶段：0=RELAX  1=速度环  2=位置速度双环
-#define TEST_STAGE 1
+#define TEST_STAGE 2
 
 // 速度环验证目标：输出轴 5 rad/s；双环验证目标：转 3.14 rad
 #define TEST_SPEED  5.0f
 #define TEST_POS    3.14159265358979f
 
+uint32_t loop_cnt = 0;
+
 void CtrlThreadEntry(ULONG arg)
 {
-    (void)arg;
+    // (void)arg;
 
     // MotorCanRx_Bind(); // bsp CAN 回调 -> 电机反馈
-    DJIMotorHandler::Instance()->registerMotor(&test_motor, MOTOR_CAN, MOTOR_ID);
-
-    test_motor.controlMode = DJIMotor::RELAX_MODE;
-
+    DJIMotorHandler::Instance()->registerMotor(&test_motor, MOTOR_CAN, MOTOR_ID);  //注册测试电机
+    // M2006::MotorStateTypedef AliveCheck();
+    test_motor.controlMode = DJIMotor::RELAX_MODE;  //设置松开模式
+DJIMotor::MotorControlModeType target_mode = DJIMotor::RELAX_MODE;
 #if (TEST_STAGE == 1)
-    test_motor.controlMode = DJIMotor::SPD_MODE;
+    target_mode = DJIMotor::SPD_MODE;
     test_motor.speedSet = TEST_SPEED;
+    tx_thread_sleep(100); 
+
 #elif (TEST_STAGE == 2)
-    test_motor.controlMode = DJIMotor::POS_MODE;
+    target_mode = DJIMotor::POS_MODE;
     test_motor.positionSet = TEST_POS;
 #endif
 
     while (1)
     {
         // 离线保护：电机掉了立刻松开，不给幽灵电流
-        if (test_motor.MotorState == DJIMotor::MOTOR_OFFLINE)
-        {
-            test_motor.controlMode = DJIMotor::RELAX_MODE;
-        }
+        test_motor.controlMode =
+            (test_motor.MotorState == DJIMotor::MOTOR_ONLINE)
+                ? target_mode
+                : DJIMotor::RELAX_MODE;
 
         test_motor.setOutput();
         DJIMotorHandler::Instance()->sendControlData();
-        DJIMotorHandler::Instance()->AllMotorAliveCheck();
+        if (++loop_cnt >= 100)              // 每 100ms 查一次在线状态
+        {
+            loop_cnt = 0;
+            DJIMotorHandler::Instance()->AllMotorAliveCheck();
+        }
 
         tx_semaphore_put(&ctrl_alive_sem);
         tx_thread_sleep(1); // 1ms 控制周期

@@ -41,6 +41,12 @@ void AliveThreadEntry(ULONG arg);
 void IMUThreadEntry(ULONG arg);
 void CtrlThreadEntry(ULONG arg);
 
-void Threads_Init(void); // 在 tx_application_define 的 USER CODE 区调用
+#ifdef __cplusplus
+extern "C" {
+#endif
+void Threads_Init(void);
+#ifdef __cplusplus
+}
+#endif // 在 tx_application_define 的 USER CODE 区调用
 
 #endif

@@ -55,7 +55,7 @@ static TX_BYTE_POOL tx_app_byte_pool;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-
+extern void Threads_Init(void);
 /* USER CODE END PFP */
 
 /**
@@ -66,7 +66,7 @@ static TX_BYTE_POOL tx_app_byte_pool;
 VOID tx_application_define(VOID *first_unused_memory)
 {
   /* USER CODE BEGIN  tx_application_define */
-
+    Threads_Init();
   /* USER CODE END  tx_application_define */
 
   VOID *memory_ptr;
