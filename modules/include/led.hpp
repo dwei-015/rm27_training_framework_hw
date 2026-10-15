@@ -15,9 +15,9 @@ extern "C" {
 
 typedef enum
 {
-    LED_R = 0,
+    LED_B = 0,
     LED_G = 1,
-    LED_B = 2,
+    LED_R = 2,
 } Led_t;
 
 void LED_On(Led_t led);

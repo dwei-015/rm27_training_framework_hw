@@ -18,7 +18,7 @@ TX_SEMAPHORE ctrl_alive_sem;
 BMI088::cBMI088 bmi088;
 M2006 test_motor;
 
-volatile bool imu_run_enable = true;
+volatile bool imu_run_enable = false;
 
 void Threads_Init(void)
 {

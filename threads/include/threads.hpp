@@ -35,7 +35,7 @@ extern TX_SEMAPHORE ctrl_alive_sem;
 extern BMI088::cBMI088 bmi088;
 extern M2006 test_motor;
 //使能
-extern volatile bool imu_run_enable;
+// extern volatile bool imu_run_enable;
 //函数
 void AliveThreadEntry(ULONG arg);
 void IMUThreadEntry(ULONG arg);

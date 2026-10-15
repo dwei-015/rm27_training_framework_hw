@@ -36,8 +36,8 @@ void AliveThreadEntry(ULONG arg)
         ctrl_status  = tx_semaphore_get(&ctrl_alive_sem, 100);                 
 
 
-        if(imu_run_enable == true)
-        {
+        // if(imu_run_enable == true)
+        // {
         if (imu_status == TX_SUCCESS)
         {
             LED_Toggle(LED_G);
@@ -58,12 +58,12 @@ void AliveThreadEntry(ULONG arg)
         {
             LED_Toggle(LED_R);
         }
-    }
+    // }
     //主动关闭imu线程
-    else
-    {
-        LED_Off(LED_G);       //绿灯灭但不报警
-    }
+    // else
+    // {
+    //     LED_Off(LED_G);       //绿灯灭但不报警
+    // }
 
         tx_thread_sleep(100); // 灯效周期 100ms，别忘了睡觉
     }
