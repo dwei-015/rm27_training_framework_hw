@@ -4,6 +4,9 @@
 #include <cmath>
 #include "spi.h" 
 
+
+
+
 namespace BMI088
 {
     /**
@@ -77,17 +80,17 @@ namespace BMI088
 
     void cBMI088::VerifyAccChipID()
     {
-        uint8_t pRxData[2]; //< 读取两个字节，第一个是需要丢弃的无效字节，第二个是芯片 ID
+        uint8_t pRxData[1]; //< 读取两个字节，第一个是需要丢弃的无效字节，第二个是芯片 ID
 
-        ReadReg(BMI088_CS_ACC, ACC_CHIP_ID_ADDR, pRxData, 2); //< 读取加速度计chip id
+        ReadReg(BMI088_CS_ACC, ACC_CHIP_ID_ADDR, pRxData, 1); //< 读取加速度计chip id
         tx_thread_sleep(1);
         //< 如果chip id不等于预设值,则加速度计ID错误,初始化错误
-        if (pRxData[1] != ACC_CHIP_ID_VAL)
+        if (pRxData[0] != ACC_CHIP_ID_VAL)
         {
             self_test.ACC_CHIP_ID_ERR = true;
             self_test.INIT_ERR = true;
         }
-        else if (pRxData[1] == ACC_CHIP_ID_VAL)
+        else if (pRxData[0] == ACC_CHIP_ID_VAL)
         {
             self_test.ACC_CHIP_ID_ERR = false;
         }
@@ -108,6 +111,8 @@ namespace BMI088
         {
             self_test.GYRO_CHIP_ID_ERR = false;
         }
+        self_test.INIT_ERR = self_test.ACC_CHIP_ID_ERR
+                         || self_test.GYRO_CHIP_ID_ERR;
     }
 
     void cBMI088::VerifyAccData()
@@ -155,7 +160,7 @@ namespace BMI088
         if (HAL_SPI_Transmit(&BMI088_SPI_HANDLE, &tx_addr, 1, 100) != HAL_OK ||
             (len > 0 && HAL_SPI_Transmit(&BMI088_SPI_HANDLE, data, len, 100) != HAL_OK))
         {
-            self_test.INIT_ERR = true; // 通信失败如实上报，不假装没事
+            self_test.INIT_ERR = true; // 通信失败上报
         }
         HAL_GPIO_WritePin(cs == BMI088_CS_ACC ? ACC_CS_PORT : GYRO_CS_PORT,
                           cs == BMI088_CS_ACC ? ACC_CS_PIN : GYRO_CS_PIN,
@@ -264,6 +269,8 @@ namespace BMI088
         pTxData = 0x01;
         WriteReg(BMI088_CS_GYRO, GYRO_INT3_INT4_IO_MAP_ADDR, &pTxData, 1);
         tx_thread_sleep(5); //< 延时5ms
+
+        
     }
 
 
