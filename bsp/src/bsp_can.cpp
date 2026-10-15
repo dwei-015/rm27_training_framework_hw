@@ -8,7 +8,7 @@ extern "C" void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     CAN_RxHeaderTypeDef header;
     uint8_t data[8];
 
-    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &header, data) != HAL_OK)
+    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &header, data) != HAL_OK) //把信息存入指定区域&检验
     {
         return;
     }
@@ -108,9 +108,10 @@ void CAN_Transmit(CAN_HandleTypeDef *hcan, uint32_t Id, uint8_t *msg, uint16_t l
     tx_header.StdId = Id;
     tx_header.IDE = CAN_ID_STD;      // 只用标准帧
     tx_header.RTR = CAN_RTR_DATA;    // 数据帧
-    tx_header.DLC = len;
+    tx_header.DLC = len; 
     tx_header.TransmitGlobalTime = DISABLE;
-    uint32_t mailbox;
-    HAL_CAN_AddTxMessage(hcan, &tx_header, msg, &mailbox);
+    uint32_t mailbox; 
+    HAL_CAN_AddTxMessage(hcan, &tx_header, msg, &mailbox);   //参数mailbox里存放此条信息使用的发送邮箱的编号，而非存数据本身
+
 }  
     

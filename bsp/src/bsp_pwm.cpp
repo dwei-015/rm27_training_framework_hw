@@ -3,20 +3,20 @@
 //
 
 #include "bsp_pwm.hpp"
-
+//一次打开实际使用的多个定时器
 void PWM_Init(void)
 {
     // TODO: 根据实际使用的定时器和通道完成 PWM 初始化。
     PWM_Start(&htim1, TIM_CHANNEL_1); // 舵机
     PWM_Start(&htim10, TIM_CHANNEL_1);  // BMI088 加热电阻，BMI088 初始化前必须先跑这行
 }
-
+//单独开启某个定时器
 void PWM_Start(TIM_HandleTypeDef *htim, uint32_t Channel)
 {
     // TODO: 调用 HAL 启动指定定时器通道的 PWM，并检查返回状态。
     if (HAL_TIM_PWM_Start(htim, Channel) != HAL_OK)
     {
-        Error_Handler();   // 启动失败就进错误处理,别让它带病跑
+        Error_Handler();   // 启动失败进错误处理
     }
 }
 
@@ -25,7 +25,7 @@ void PWM_Stop(TIM_HandleTypeDef *htim, uint32_t Channel)
     // TODO: 调用 HAL 停止指定定时器通道的 PWM。
    if (HAL_TIM_PWM_Stop(htim, Channel) != HAL_OK)
     {
-        Error_Handler();   // 启动失败就进错误处理,别让它带病跑
+        Error_Handler();   // 启动失败进错误处理
     }
 }
 
