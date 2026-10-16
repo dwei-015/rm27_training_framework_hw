@@ -213,15 +213,25 @@ namespace BMI088
         WriteReg(BMI088_CS_ACC, ACC_SOFTRESET_ADDR, &pTxData, 1);
         tx_thread_sleep(100); //< 延时100ms,重启需要时间
 
+        //< 加速度计变成正常模式
+        pTxData = ACC_PWR_CONF_ACT;
+        WriteReg(BMI088_CS_ACC, ACC_PWR_CONF_ADDR, &pTxData, 1);
+        tx_thread_sleep(10); //
+
+
         //< 打开加速度计电源
         pTxData = ACC_PWR_CTRL_ON;
         WriteReg(BMI088_CS_ACC, ACC_PWR_CTRL_ADDR, &pTxData, 1);
         tx_thread_sleep(150);
 
-        //< 加速度计变成正常模式
-        pTxData = ACC_PWR_CONF_ACT;
-        WriteReg(BMI088_CS_ACC, ACC_PWR_CONF_ADDR, &pTxData, 1);
-        tx_thread_sleep(10); //
+        // //< 加速度计变成正常模式
+        // pTxData = ACC_PWR_CONF_ACT;
+        // WriteReg(BMI088_CS_ACC, ACC_PWR_CONF_ADDR, &pTxData, 1);
+        // tx_thread_sleep(10); //
+
+        uint8_t dummy[2];
+        ReadReg(BMI088_CS_ACC, ACC_CHIP_ID_ADDR, dummy, 2);
+        // 同步接口，吸收第一次通信可能产生的垃圾 ；读芯片 ID 寄存器(读啥都行),结果丢进 dummy,不看
 
         //< 测量范围
         pTxData = ACC_RANGE_6G;
